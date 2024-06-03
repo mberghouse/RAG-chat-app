@@ -3,7 +3,6 @@ import json
 from dotenv import load_dotenv
 from llama_index.core import StorageContext, ServiceContext, load_index_from_storage
 from llama_index.core.callbacks.base import CallbackManager
-#from llama_index.embeddings.gemini import GeminiEmbedding
 from llama_index.llms.groq import Groq
 from llama_index.postprocessor.cohere_rerank import CohereRerank
 import chainlit as cl
@@ -50,19 +49,15 @@ def clear_conversation_history():
 
 @cl.on_chat_start
 async def factory():
+    print("Initializing chat...")
     storage_context = StorageContext.from_defaults(persist_dir="./storage")
 
     embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-large-en-v1.5", trust_remote_code=True)
-    #llm = Groq(model="Llama3-70b-8192", api_key=GROQ_API_KEY)
-    llm = Ollama(model="llama3:8b", request_timeout=800.0)
-    service_context = ServiceContext.from_defaults(
-        embed_model=embed_model,
-        llm=llm,
-        callback_manager=CallbackManager([cl.LlamaIndexCallbackHandler()])
-    )
-    cohere_rerank = CohereRerank(api_key=COHERE_API_KEY, top_n=2)
+    llm = Ollama(model="llama2")
+    service_context = ServiceContext.from_defaults(llm=llm, embed_model=embed_model)
 
     index = load_index_from_storage(storage_context, service_context=service_context)
+    cohere_rerank = CohereRerank(api_key=COHERE_API_KEY)
 
     query_engine = index.as_query_engine(
         service_context=service_context,
@@ -117,6 +112,9 @@ async def main(message: cl.Message):
 
 # Testing clear function
 if __name__ == "__main__":
-    #clear_conversation_history()
-    print("Starting application...")
+    print("Clearing conversation history...")
+    clear_conversation_history()
+    print("Starting the Chainlit server...")
+    cl.run()
+
 
