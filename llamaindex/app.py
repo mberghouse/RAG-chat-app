@@ -117,6 +117,6 @@ async def main(message: cl.Message):
 
 # Testing clear function
 if __name__ == "__main__":
-    clear_conversation_history()
-
+    #clear_conversation_history()
+    print("Starting application...")
 
